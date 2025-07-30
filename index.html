@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom CSV Generator</title>
+</head>
+<body>
+  <h1>Customize CSV Output</h1>
+  <label>Year:
+      <select id="Year">
+      <option>2021</option>
+      <option>2025</option>
+      <option>2030</option>
+      <option>2035</option>
+      <option>2040</option>
+      <option>2045</option>
+      <option>2050</option>
+    </select>
+  </label>
+  <label>Weather Year:
+      <select id="weatherYear">
+      <option>2007</option>
+      <option>2008</option>
+      <option>2009</option>
+      <option>2010</option>
+      <option>2011</option>
+      <option>2012</option>
+      <option>2013</option>
+      <option>2014</option>
+      <option>2015</option>
+      <option>2016</option>
+      <option>2017</option>
+      <option>2018</option>
+      <option>2019</option>
+      <option>2020</option>
+      <option>2021</option>
+      <option>2022</option>
+      <option>2023</option>
+    </select>
+  </label>
+  <label>Scenario:
+    <select id="scenario">
+      <option>baseline</option>
+      <option>central</option>
+      <option>conservative</option>
+    </select>
+  </label>
+    <h3>Subsector Customization (State-Specific)</h3>
+    <label>State:
+    <input id="stateInput" type="text" placeholder="e.g. texas" />
+    </label>
+    <div id="subsectorInputs"></div>
+
+  <br/><br/>
+  <button onclick="submitForm()">Generate & Download</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
