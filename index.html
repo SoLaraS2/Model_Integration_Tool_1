@@ -2,58 +2,477 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Custom CSV Generator</title>
+  <title>Model Integration Tool</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #9eadec 0%, #d5d5eb 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+    }
+
+    .states-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .state-container { 
+      border: none;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .state-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .state-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #667eea, #babae9);
+      padding: 15px;
+      border-radius: 12px;
+      color: white;
+    }
+
+    .state-title { 
+      font-weight: bold; 
+      font-size: 18px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .state-name-input {
+      margin-left: 15px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .state-name-input:focus {
+      outline: none;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+
+    .remove-state { 
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white; 
+      border: none; 
+      padding: 8px 16px; 
+      border-radius: 8px; 
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+    }
+
+    .remove-state:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(238, 90, 36, 0.4);
+    }
+
+    .subsector-row { 
+      display: flex; 
+      gap: 12px; 
+      align-items: center; 
+      margin-bottom: 8px;
+      padding: 8px;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+    }
+
+    .subsector-row:hover {
+      background-color: rgba(102, 126, 234, 0.05);
+    }
+
+    .subsector-row:first-child {
+      background: linear-gradient(135deg, #667eea, #babae9);
+      color: white;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .subsector-label { 
+      width: 250px; 
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .percent-input, .scenario-input { 
+      padding: 8px 10px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #727272;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .percent-input { width: 80px; }
+    .scenario-input { width: 120px; }
+
+    .percent-input:focus, .scenario-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .add-state-btn { 
+      background: linear-gradient(135deg, #10ac84, #81bdab);
+      color: white; 
+      border: none; 
+      padding: 15px 30px; 
+      border-radius: 12px; 
+      cursor: pointer; 
+      font-size: 16px;
+      font-weight: 600;
+      margin: 30px 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(16, 172, 132, 0.3);
+    }
+
+    .add-state-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(16, 172, 132, 0.4);
+    }
+
+    .main-controls { 
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 25px; 
+      border-radius: 16px; 
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 30px;
+    }
+
+    .main-controls label {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-right: 30px;
+    }
+
+    .main-controls select {
+      padding: 10px 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-size: 16px;
+      background: white;
+      transition: all 0.3s ease;
+      margin-left: 10px;
+    }
+
+    .main-controls select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .generate-btn {
+      background: linear-gradient(135deg, #667eea, #babae9);
+      color: white;
+      border: none;
+      padding: 18px 40px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+      margin: 30px 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+    }
+
+    .subsectors-container {
+      max-height: 400px;
+      overflow-y: auto;
+      border-radius: 8px;
+      background: rgba(248, 249, 250, 0.8);
+      padding: 10px;
+    }
+
+    .subsectors-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .subsectors-container::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+
+    .subsectors-container::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea, #babae9);
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .states-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .subsector-label { width: 200px; }
+      .main-controls label { margin-right: 15px; }
+      
+      h1 { font-size: 2rem; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Customize CSV Output</h1>
-  <label>Year:
+  <h1>Model Integration Tool</h1>
+  <div class="main-controls">
+    <label>Year:
       <select id="Year">
-      <option>2021</option>
-      <option>2025</option>
-      <option>2030</option>
-      <option>2035</option>
-      <option>2040</option>
-      <option>2045</option>
-      <option>2050</option>
-    </select>
-  </label>
-  <label>Weather Year:
-      <select id="weatherYear">
-      <option>2007</option>
-      <option>2008</option>
-      <option>2009</option>
-      <option>2010</option>
-      <option>2011</option>
-      <option>2012</option>
-      <option>2013</option>
-      <option>2014</option>
-      <option>2015</option>
-      <option>2016</option>
-      <option>2017</option>
-      <option>2018</option>
-      <option>2019</option>
-      <option>2020</option>
-      <option>2021</option>
-      <option>2022</option>
-      <option>2023</option>
-    </select>
-  </label>
-  <label>Scenario:
-    <select id="scenario">
-      <option>baseline</option>
-      <option>central</option>
-      <option>conservative</option>
-    </select>
-  </label>
-    <h3>Subsector Customization (State-Specific)</h3>
-    <label>State:
-    <input id="stateInput" type="text" placeholder="e.g. texas" />
+        <option>2021</option>
+        <option>2025</option>
+        <option>2030</option>
+        <option>2035</option>
+        <option>2040</option>
+        <option>2045</option>
+        <option>2050</option>
+      </select>
     </label>
-    <div id="subsectorInputs"></div>
+    
+    <label style="margin-left: 20px;">Base Scenario:
+      <select id="scenario">
+        <option>baseline</option>
+        <option>central</option>
+        <option>conservative</option>
+      </select>
+    </label>
+  </div>
 
-  <br/><br/>
-  <button onclick="submitForm()">Generate & Download</button>
+  <div id="statesContainer" class="states-grid">
+    <!-- State containers will be added here -->
+  </div>
 
-  <script src="script.js"></script>
+  <button class="add-state-btn" onclick="addState()">+ Add State Configuration</button>
+  <br/>
+  <button class="generate-btn" onclick="submitForm()">Generate & Download CSV</button>
+
+  <script>
+    const subsectors = [
+      'commercial air conditioning', 'commercial cooking', 'commercial lighting',
+      'commercial other', 'commercial refrigeration', 'commercial space heating',
+      'commercial ventilation', 'commercial water heating', 'data center cooling',
+      'data center it', 'district services', 'office equipment (non-p.c.)',
+      'office equipment (p.c.)', 'streetlights', 'agriculture-crops',
+      'agriculture-other', 'aluminum industry', 'balance of manufacturing other',
+      'bulk chemicals', 'cement', 'coal mining', 'computer and electronic products',
+      'construction', 'electrical equip., appliances, and components',
+      'fabricated metal products', 'food and kindred products',
+      'glass and glass products', 'machinery', 'metal and other non-metallic mining',
+      'oil & gas mining', 'paper and allied products', 'petroleum refining',
+      'plastic and rubber products', 'transportation equipment', 'wood products',
+      'residential air conditioning', 'residential ceiling fans',
+      'residential clothes drying', 'residential clothes washing',
+      'residential cooking', 'residential cooking - secondary',
+      'residential dehumidifiers', 'residential dishwashing', 'residential freezing',
+      'residential furnace fans and boiler pumps', 'residential hot tubs',
+      'residential humidifiers', 'residential lighting', 'residential microwaves',
+      'residential other', 'residential pool pumps', 'residential refrigeration',
+      'residential secondary heating', 'residential space heating',
+      'residential tv and peripherals', 'residential water heating',
+      'combination short-haul truck', 'light-commercial truck', 'other bus', 
+      'passenger car', 'passenger rail', 'passenger truck', 'transit bus'
+    ];
+
+    // Subsectors that should always use baseline scenario and no percentage changes
+    const baselineOnlySubsectors = [
+      'combination long-haul truck', 'motor home', 'refuse truck', 
+      'school bus', 'single unit long-haul truck', 'single unit short-haul truck'
+    ];
+
+    let stateCounter = 0;
+
+    function addState() {
+      stateCounter++;
+      const container = document.getElementById("statesContainer");
+      
+      const stateDiv = document.createElement("div");
+      stateDiv.className = "state-container";
+      stateDiv.id = `state-${stateCounter}`;
+      
+      const headerDiv = document.createElement("div");
+      headerDiv.className = "state-header";
+      
+      const titleDiv = document.createElement("div");
+      titleDiv.innerHTML = `
+        <span class="state-title">State Configuration ${stateCounter}</span>
+        <input type="text" placeholder="Enter state name (e.g., texas)" 
+               style="margin-left: 10px; padding: 5px;" 
+               class="state-name-input" />
+      `;
+      
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "remove-state";
+      removeBtn.textContent = "Remove State";
+      removeBtn.onclick = () => removeState(stateCounter);
+      
+      headerDiv.appendChild(titleDiv);
+      headerDiv.appendChild(removeBtn);
+      
+      const subsectorsDiv = document.createElement("div");
+      subsectorsDiv.className = "subsectors-container";
+      
+      // Add header row
+      const headerRow = document.createElement("div");
+      headerRow.className = "subsector-row";
+      headerRow.style.fontWeight = "bold";
+      headerRow.style.backgroundColor = "#ddd";
+      headerRow.style.padding = "5px";
+      headerRow.innerHTML = `
+        <div class="subsector-label">Subsector</div>
+        <div class="percent-input">Multiplier</div>
+        <div class="scenario-input">Scenario</div>
+      `;
+      subsectorsDiv.appendChild(headerRow);
+      
+      // Add subsector rows
+      subsectors.forEach(subsector => {
+        const row = document.createElement("div");
+        row.className = "subsector-row";
+        
+        const label = document.createElement("div");
+        label.className = "subsector-label";
+        label.textContent = subsector;
+        
+        const percentInput = document.createElement("input");
+        percentInput.type = "number";
+        percentInput.min = "0";
+        percentInput.max = "1";
+        percentInput.step = "0.01";
+        percentInput.placeholder = "0.0";
+        percentInput.className = "percent-input";
+        percentInput.dataset.subsector = subsector;
+        percentInput.dataset.stateId = stateCounter;
+        
+        const scenarioInput = document.createElement("select");
+        scenarioInput.className = "scenario-input";
+        scenarioInput.dataset.subsector = subsector;
+        scenarioInput.dataset.stateId = stateCounter;
+        scenarioInput.innerHTML = `
+          <option value="">Use Base</option>
+          <option value="baseline">baseline</option>
+          <option value="central">central</option>
+          <option value="conservative">conservative</option>
+        `;
+        
+        row.appendChild(label);
+        row.appendChild(percentInput);
+        row.appendChild(scenarioInput);
+        subsectorsDiv.appendChild(row);
+      });
+      
+      stateDiv.appendChild(headerDiv);
+      stateDiv.appendChild(subsectorsDiv);
+      container.appendChild(stateDiv);
+    }
+
+    function removeState(stateId) {
+      const stateDiv = document.getElementById(`state-${stateId}`);
+      if (stateDiv) {
+        stateDiv.remove();
+      }
+    }
+
+    function submitForm() {
+      const year = document.getElementById("Year").value;
+      const scenario = document.getElementById("scenario").value;
+      const custom_values = {};
+      const fallback_scenarios = {};
+
+      // Process each state container
+      document.querySelectorAll(".state-container").forEach(stateContainer => {
+        const stateNameInput = stateContainer.querySelector(".state-name-input");
+        const stateName = (stateNameInput && stateNameInput.value) ? stateNameInput.value.trim().toLowerCase() : "__ALL_STATES__";
+        
+        // Get percentage values for this state
+        stateContainer.querySelectorAll(".percent-input").forEach(input => {
+          const subsector = input.dataset.subsector;
+          const value = parseFloat(input.value);
+          if (!isNaN(value) && value > 0) {
+            custom_values[[stateName, subsector]] = value;
+          }
+        });
+
+        // Get scenario overrides for this state
+        stateContainer.querySelectorAll(".scenario-input").forEach(input => {
+          const subsector = input.dataset.subsector;
+          const value = input.value ? input.value.trim().toLowerCase() : "";
+          if (value && value !== "") {
+            fallback_scenarios[[stateName, subsector]] = value;
+          }
+        });
+      });
+
+      const payload = {
+        year,
+        scenario,
+        custom_values,
+        fallback_scenarios,
+      };
+
+      console.log("Sending payload:", payload);
+
+      fetch("http://localhost:5000/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(async res => {
+        if (res.ok) {
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `custom_${year}_${scenario}.csv`;
+          a.click();
+        } else {
+          const err = await res.json();
+          alert("Error: " + err.error);
+        }
+      }).catch(error => {
+        alert("Network error: " + error.message);
+      });
+    }
+
+    // Add first state by default
+    window.onload = () => {
+      addState();
+    };
+  </script>
 </body>
 </html>
