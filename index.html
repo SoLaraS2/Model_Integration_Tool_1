@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Model Integration Tool</title>
   <style>
-    body { 
+    body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
       background: linear-gradient(135deg, #9eadec 0%, #d5d5eb 100%);
@@ -16,7 +17,7 @@
 
     h1 {
       color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
       font-size: 2.5rem;
       margin-bottom: 30px;
     }
@@ -31,7 +32,7 @@
       margin-right: auto;
     }
 
-    .state-container { 
+    .state-container {
       border: none;
       border-radius: 16px;
       background: rgba(255, 255, 255, 0.95);
@@ -46,10 +47,10 @@
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
     }
 
-    .state-header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
+    .state-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
       background: linear-gradient(135deg, #667eea, #babae9);
       padding: 15px;
@@ -57,10 +58,10 @@
       color: white;
     }
 
-    .state-title { 
-      font-weight: bold; 
+    .state-title {
+      font-weight: bold;
       font-size: 18px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
     }
 
     .state-name-input {
@@ -70,7 +71,7 @@
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.9);
       font-size: 14px;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
     }
 
@@ -80,12 +81,12 @@
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
     }
 
-    .remove-state { 
+    .remove-state {
       background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-      color: white; 
-      border: none; 
-      padding: 8px 16px; 
-      border-radius: 8px; 
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       transition: all 0.3s ease;
@@ -97,10 +98,10 @@
       box-shadow: 0 6px 20px rgba(238, 90, 36, 0.4);
     }
 
-    .subsector-row { 
-      display: flex; 
-      gap: 12px; 
-      align-items: center; 
+    .subsector-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
       margin-bottom: 8px;
       padding: 8px;
       border-radius: 8px;
@@ -118,13 +119,14 @@
       margin-bottom: 12px;
     }
 
-    .subsector-label { 
-      width: 250px; 
+    .subsector-label {
+      width: 250px;
       text-align: left;
       font-size: 13px;
     }
 
-    .percent-input, .scenario-input { 
+    .percent-input,
+    .scenario-input {
       padding: 8px 10px;
       border: 2px solid #e1e8ed;
       border-radius: 8px;
@@ -134,22 +136,28 @@
       background: white;
     }
 
-    .percent-input { width: 80px; }
-    .scenario-input { width: 120px; }
+    .percent-input {
+      width: 80px;
+    }
 
-    .percent-input:focus, .scenario-input:focus {
+    .scenario-input {
+      width: 120px;
+    }
+
+    .percent-input:focus,
+    .scenario-input:focus {
       outline: none;
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
-    .add-state-btn { 
+    .add-state-btn {
       background: linear-gradient(135deg, #10ac84, #81bdab);
-      color: white; 
-      border: none; 
-      padding: 15px 30px; 
-      border-radius: 12px; 
-      cursor: pointer; 
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 12px;
+      cursor: pointer;
       font-size: 16px;
       font-weight: 600;
       margin: 30px 0;
@@ -162,11 +170,11 @@
       box-shadow: 0 12px 35px rgba(16, 172, 132, 0.4);
     }
 
-    .main-controls { 
+    .main-controls {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
-      padding: 25px; 
-      border-radius: 16px; 
+      padding: 25px;
+      border-radius: 16px;
       margin-bottom: 30px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
       max-width: 600px;
@@ -229,7 +237,7 @@
     }
 
     .subsectors-container::-webkit-scrollbar-track {
-      background: rgba(0,0,0,0.1);
+      background: rgba(0, 0, 0, 0.1);
       border-radius: 4px;
     }
 
@@ -243,14 +251,22 @@
         grid-template-columns: 1fr;
         gap: 15px;
       }
-      
-      .subsector-label { width: 200px; }
-      .main-controls label { margin-right: 15px; }
-      
-      h1 { font-size: 2rem; }
+
+      .subsector-label {
+        width: 200px;
+      }
+
+      .main-controls label {
+        margin-right: 15px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
     }
   </style>
 </head>
+
 <body>
   <h1>Model Integration Tool</h1>
   <div class="main-controls">
@@ -265,7 +281,7 @@
         <option>2050</option>
       </select>
     </label>
-    
+
     <label style="margin-left: 20px;">Base Scenario:
       <select id="scenario">
         <option>baseline</option>
@@ -280,14 +296,23 @@
   </div>
 
   <button class="add-state-btn" onclick="addState()">+ Add State Configuration</button>
-  <br/>
+  <br />
   <button class="generate-btn" onclick="submitForm()">Generate & Download CSV</button>
 
   <script>
     const subsectors = [
-      'commercial air conditioning', 'commercial cooking', 'commercial lighting',
-      'commercial other', 'commercial refrigeration', 'commercial space heating',
-      'commercial ventilation', 'commercial water heating', 'data center cooling',
+      'commercial air conditioning', 'commercial lighting',
+      'commercial refrigeration', 'commercial space heating',
+      'commercial ventilation',
+      'residential air conditioning',
+      'residential furnace fans and boiler pumps', 'residential space heating',
+      'light-commercial truck',
+      'passenger car', 'passenger truck'
+    ];
+
+    // Subsectors that should always use baseline scenario and no percentage changes
+    const baselineOnlySubsectors = [
+      'combination long-haul truck', 'commercial cooking', 'commercial other', 'commercial water heating', 'data center cooling',
       'data center it', 'district services', 'office equipment (non-p.c.)',
       'office equipment (p.c.)', 'streetlights', 'agriculture-crops',
       'agriculture-other', 'aluminum industry', 'balance of manufacturing other',
@@ -296,24 +321,15 @@
       'fabricated metal products', 'food and kindred products',
       'glass and glass products', 'machinery', 'metal and other non-metallic mining',
       'oil & gas mining', 'paper and allied products', 'petroleum refining',
-      'plastic and rubber products', 'transportation equipment', 'wood products',
-      'residential air conditioning', 'residential ceiling fans',
+      'plastic and rubber products', 'transportation equipment', 'wood products', 'motor home', 'refuse truck', 'residential ceiling fans',
       'residential clothes drying', 'residential clothes washing',
       'residential cooking', 'residential cooking - secondary',
-      'residential dehumidifiers', 'residential dishwashing', 'residential freezing',
-      'residential furnace fans and boiler pumps', 'residential hot tubs',
+      'residential dehumidifiers', 'residential dishwashing', 'residential freezing', 'residential hot tubs',
       'residential humidifiers', 'residential lighting', 'residential microwaves',
       'residential other', 'residential pool pumps', 'residential refrigeration',
-      'residential secondary heating', 'residential space heating',
-      'residential tv and peripherals', 'residential water heating',
-      'combination short-haul truck', 'light-commercial truck', 'other bus', 
-      'passenger car', 'passenger rail', 'passenger truck', 'transit bus'
-    ];
-
-    // Subsectors that should always use baseline scenario and no percentage changes
-    const baselineOnlySubsectors = [
-      'combination long-haul truck', 'motor home', 'refuse truck', 
-      'school bus', 'single unit long-haul truck', 'single unit short-haul truck'
+      'residential secondary heating',
+      'school bus', 'single unit long-haul truck', 'single unit short-haul truck', 'residential tv and peripherals', 'residential water heating',
+      'combination short-haul truck', 'other bus', 'passenger rail', 'transit bus'
     ];
 
     let stateCounter = 0;
@@ -321,14 +337,14 @@
     function addState() {
       stateCounter++;
       const container = document.getElementById("statesContainer");
-      
+
       const stateDiv = document.createElement("div");
       stateDiv.className = "state-container";
       stateDiv.id = `state-${stateCounter}`;
-      
+
       const headerDiv = document.createElement("div");
       headerDiv.className = "state-header";
-      
+
       const titleDiv = document.createElement("div");
       titleDiv.innerHTML = `
         <span class="state-title">State Configuration ${stateCounter}</span>
@@ -336,18 +352,18 @@
                style="margin-left: 10px; padding: 5px;" 
                class="state-name-input" />
       `;
-      
+
       const removeBtn = document.createElement("button");
       removeBtn.className = "remove-state";
       removeBtn.textContent = "Remove State";
       removeBtn.onclick = () => removeState(stateCounter);
-      
+
       headerDiv.appendChild(titleDiv);
       headerDiv.appendChild(removeBtn);
-      
+
       const subsectorsDiv = document.createElement("div");
       subsectorsDiv.className = "subsectors-container";
-      
+
       // Add header row
       const headerRow = document.createElement("div");
       headerRow.className = "subsector-row";
@@ -360,16 +376,16 @@
         <div class="scenario-input">Scenario</div>
       `;
       subsectorsDiv.appendChild(headerRow);
-      
+
       // Add subsector rows
       subsectors.forEach(subsector => {
         const row = document.createElement("div");
         row.className = "subsector-row";
-        
+
         const label = document.createElement("div");
         label.className = "subsector-label";
         label.textContent = subsector;
-        
+
         const percentInput = document.createElement("input");
         percentInput.type = "number";
         percentInput.min = "0";
@@ -379,7 +395,7 @@
         percentInput.className = "percent-input";
         percentInput.dataset.subsector = subsector;
         percentInput.dataset.stateId = stateCounter;
-        
+
         const scenarioInput = document.createElement("select");
         scenarioInput.className = "scenario-input";
         scenarioInput.dataset.subsector = subsector;
@@ -390,13 +406,13 @@
           <option value="central">central</option>
           <option value="conservative">conservative</option>
         `;
-        
+
         row.appendChild(label);
         row.appendChild(percentInput);
         row.appendChild(scenarioInput);
         subsectorsDiv.appendChild(row);
       });
-      
+
       stateDiv.appendChild(headerDiv);
       stateDiv.appendChild(subsectorsDiv);
       container.appendChild(stateDiv);
@@ -419,7 +435,7 @@
       document.querySelectorAll(".state-container").forEach(stateContainer => {
         const stateNameInput = stateContainer.querySelector(".state-name-input");
         const stateName = (stateNameInput && stateNameInput.value) ? stateNameInput.value.trim().toLowerCase() : "__ALL_STATES__";
-        
+
         // Get percentage values for this state
         stateContainer.querySelectorAll(".percent-input").forEach(input => {
           const subsector = input.dataset.subsector;
@@ -475,4 +491,5 @@
     };
   </script>
 </body>
+
 </html>
