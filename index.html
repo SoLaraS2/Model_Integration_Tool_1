@@ -58,24 +58,50 @@
       color: white;
     }
 
+    .state-title-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      flex-grow: 1;
+    }
+
     .state-title {
       font-weight: bold;
       font-size: 18px;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+      margin-bottom: 8px;
+    }
+
+    .state-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
 
     .state-name-input {
-      margin-left: 15px;
-      padding: 8px 12px;
+      padding: 6px 10px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       background: rgba(255, 255, 255, 0.9);
-      font-size: 14px;
+      font-size: 13px;
       box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
+      width: 120px;
     }
 
-    .state-name-input:focus {
+    .state-base-scenario {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 13px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      width: 100px;
+    }
+
+    .state-name-input:focus,
+    .state-base-scenario:focus {
       outline: none;
       background: white;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
@@ -246,6 +272,16 @@
       border-radius: 4px;
     }
 
+    .info-text {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+      text-align: left;
+      background: rgba(102, 126, 234, 0.1);
+      padding: 10px;
+      border-radius: 6px;
+    }
+
     @media (max-width: 768px) {
       .states-grid {
         grid-template-columns: 1fr;
@@ -262,6 +298,11 @@
 
       h1 {
         font-size: 2rem;
+      }
+
+      .state-controls {
+        flex-direction: column;
+        gap: 5px;
       }
     }
   </style>
@@ -282,13 +323,21 @@
       </select>
     </label>
 
-    <label style="margin-left: 20px;">Base Scenario:
+    <label style="margin-left: 20px;">Global Base Scenario:
       <select id="scenario">
         <option>baseline</option>
         <option>central</option>
         <option>conservative</option>
       </select>
     </label>
+  </div>
+
+  <div class="info-text">
+    <strong>How it works:</strong><br>
+    • Global Base Scenario applies to all states/subsectors by default<br>
+    • State Base Scenario overrides global base for that specific state<br>
+    • Subsector scenarios override the state base (or global base if no state base set)<br>
+    • Multipliers are applied after scenario selection
   </div>
 
   <div id="statesContainer" class="states-grid">
@@ -301,22 +350,21 @@
 
   <script>
     const subsectors = [
-      'commercial air conditioning', 'commercial lighting',
-      'commercial refrigeration', 'commercial space heating',
-      'commercial ventilation',
+      'combination long-haul truck', 'commercial air conditioning', 'commercial lighting',
+      'commercial space heating',
       'residential air conditioning',
-      'residential furnace fans and boiler pumps', 'residential space heating',
-      'light-commercial truck',
-      'passenger car', 'passenger truck'
+      'residential space heating',
+      'light-commercial truck', 'residential water heating', 'single unit short-haul truck',
+      'passenger car', 'passenger truck', 'commercial water heating', 'combination short-haul truck'
     ];
 
     // Subsectors that should always use baseline scenario and no percentage changes
     const baselineOnlySubsectors = [
-      'combination long-haul truck', 'commercial cooking', 'commercial other', 'commercial water heating', 'data center cooling',
+      'commercial cooking', 'commercial other', 'commercial refrigeration', 'data center cooling',
       'data center it', 'district services', 'office equipment (non-p.c.)',
       'office equipment (p.c.)', 'streetlights', 'agriculture-crops',
-      'agriculture-other', 'aluminum industry', 'balance of manufacturing other',
-      'bulk chemicals', 'cement', 'coal mining', 'computer and electronic products',
+      'agriculture-other', 'aluminum industry', 'balance of manufacturing other', 'residential furnace fans and boiler pumps',
+      'bulk chemicals', 'cement', 'coal mining', 'commercial ventilation', 'computer and electronic products',
       'construction', 'electrical equip., appliances, and components',
       'fabricated metal products', 'food and kindred products',
       'glass and glass products', 'machinery', 'metal and other non-metallic mining',
@@ -328,8 +376,8 @@
       'residential humidifiers', 'residential lighting', 'residential microwaves',
       'residential other', 'residential pool pumps', 'residential refrigeration',
       'residential secondary heating',
-      'school bus', 'single unit long-haul truck', 'single unit short-haul truck', 'residential tv and peripherals', 'residential water heating',
-      'combination short-haul truck', 'other bus', 'passenger rail', 'transit bus'
+      'school bus', 'single unit long-haul truck', 'residential tv and peripherals',
+      'other bus', 'passenger rail', 'transit bus'
     ];
 
     let stateCounter = 0;
@@ -345,20 +393,35 @@
       const headerDiv = document.createElement("div");
       headerDiv.className = "state-header";
 
+      const titleSection = document.createElement("div");
+      titleSection.className = "state-title-section";
+
       const titleDiv = document.createElement("div");
-      titleDiv.innerHTML = `
-        <span class="state-title">State Configuration ${stateCounter}</span>
-        <input type="text" placeholder="Enter state name (e.g., texas)" 
-               style="margin-left: 10px; padding: 5px;" 
+      titleDiv.className = "state-title";
+      titleDiv.textContent = `State Configuration ${stateCounter}`;
+
+      const controlsDiv = document.createElement("div");
+      controlsDiv.className = "state-controls";
+      controlsDiv.innerHTML = `
+        <input type="text" placeholder="State name (e.g., texas)" 
                class="state-name-input" />
+        <select class="state-base-scenario">
+          <option value="">Use Global Base</option>
+          <option value="baseline">baseline</option>
+          <option value="central">central</option>
+          <option value="conservative">conservative</option>
+        </select>
       `;
+
+      titleSection.appendChild(titleDiv);
+      titleSection.appendChild(controlsDiv);
 
       const removeBtn = document.createElement("button");
       removeBtn.className = "remove-state";
       removeBtn.textContent = "Remove State";
       removeBtn.onclick = () => removeState(stateCounter);
 
-      headerDiv.appendChild(titleDiv);
+      headerDiv.appendChild(titleSection);
       headerDiv.appendChild(removeBtn);
 
       const subsectorsDiv = document.createElement("div");
@@ -373,7 +436,7 @@
       headerRow.innerHTML = `
         <div class="subsector-label">Subsector</div>
         <div class="percent-input">Multiplier</div>
-        <div class="scenario-input">Scenario</div>
+        <div class="scenario-input">Scenario Override</div>
       `;
       subsectorsDiv.appendChild(headerRow);
 
@@ -389,7 +452,7 @@
         const percentInput = document.createElement("input");
         percentInput.type = "number";
         percentInput.min = "0";
-        percentInput.max = "1";
+        percentInput.max = "10";
         percentInput.step = "0.01";
         percentInput.placeholder = "0.0";
         percentInput.className = "percent-input";
@@ -401,7 +464,7 @@
         scenarioInput.dataset.subsector = subsector;
         scenarioInput.dataset.stateId = stateCounter;
         scenarioInput.innerHTML = `
-          <option value="">Use Base</option>
+          <option value="">Use State/Global Base</option>
           <option value="baseline">baseline</option>
           <option value="central">central</option>
           <option value="conservative">conservative</option>
@@ -427,20 +490,29 @@
 
     function submitForm() {
       const year = document.getElementById("Year").value;
-      const scenario = document.getElementById("scenario").value;
+      const globalScenario = document.getElementById("scenario").value;
       const custom_values = {};
       const fallback_scenarios = {};
+      const state_base_scenarios = {};
 
       // Process each state container
       document.querySelectorAll(".state-container").forEach(stateContainer => {
         const stateNameInput = stateContainer.querySelector(".state-name-input");
+        const stateBaseScenarioInput = stateContainer.querySelector(".state-base-scenario");
+
         const stateName = (stateNameInput && stateNameInput.value) ? stateNameInput.value.trim().toLowerCase() : "__ALL_STATES__";
+        const stateBaseScenario = (stateBaseScenarioInput && stateBaseScenarioInput.value) ? stateBaseScenarioInput.value.trim().toLowerCase() : "";
+
+        // Store state base scenario if different from global
+        if (stateBaseScenario && stateBaseScenario !== globalScenario) {
+          state_base_scenarios[stateName] = stateBaseScenario;
+        }
 
         // Get percentage values for this state
         stateContainer.querySelectorAll(".percent-input").forEach(input => {
           const subsector = input.dataset.subsector;
           const value = parseFloat(input.value);
-          if (!isNaN(value) && value > 0) {
+          if (!isNaN(value) && value !== 0.0) {
             custom_values[[stateName, subsector]] = value;
           }
         });
@@ -457,9 +529,10 @@
 
       const payload = {
         year,
-        scenario,
+        scenario: globalScenario,
         custom_values,
         fallback_scenarios,
+        state_base_scenarios
       };
 
       console.log("Sending payload:", payload);
@@ -474,7 +547,7 @@
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = `custom_${year}_${scenario}.csv`;
+          a.download = `custom_${year}_${globalScenario}.csv`;
           a.click();
         } else {
           const err = await res.json();
