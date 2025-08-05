@@ -137,7 +137,6 @@ def process_data():
         full_df["weather_datetime"] = pd.to_datetime(full_df["weather_datetime"])
 
         # Process shed/shift functionality
-        # -------- Shed/Shift: Final Step --------
         augmented_rows = []
         for state, enabled in shed_shift_enabled.items():
             if not enabled or state == "__all_states__":
@@ -147,44 +146,61 @@ def process_data():
                 continue
             if state_clean not in full_df.columns:
                 continue
-            for subsector, vals in shed_shift_config[state_clean].items():
-                shed = vals.get("shed", 0.0)
-                shift = vals.get("shift", 0.0)
-                if shed == 0.0 and shift == 0.0:
-                    continue
-                sub_mask = full_df["subsector"] == subsector
-                sub_df = full_df[sub_mask].copy()
-                if sub_df.empty:
-                    continue
-                # Top 200 hours by state value
-                top_rows = sub_df.nlargest(200, state_clean)
-                if top_rows.empty:
-                    continue
-                # Remove top rows from original full_df
-                full_df = full_df.drop(top_rows.index)
-
-                # For each top row, split into static, shed, shift so sum matches original
-                for _, row in top_rows.iterrows():
-                    val = row[state_clean]
-                    static_val = (1 - shed - shift) * val
-                    shed_val = shed * val
-                    shift_val = shift * val
-                    # Defensive: never negative
-                    static_val = max(static_val, 0.0)
-                    shed_val = max(shed_val, 0.0)
-                    shift_val = max(shift_val, 0.0)
-                    # Build three new rows, one for each row_type
-                    for t, v in zip(['static', 'shed', 'shift'], [static_val, shed_val, shift_val]):
+            
+            # Get top 250 hours across ALL subsectors for this state
+            top_rows = full_df.nlargest(250, state_clean)
+            #print the unique subsectors in top_rows
+            unique_subsectors = top_rows['subsector'].unique()
+            print("unique:", unique_subsectors,state_clean, "all done")
+            
+            if top_rows.empty:
+                continue
+            
+            # Remove top rows from original full_df
+            full_df = full_df.drop(top_rows.index)
+            
+            # Process each top row
+            for _, row in top_rows.iterrows():
+                subsector = row["subsector"]
+                
+                # Check if this subsector has shed/shift configuration
+                if subsector in shed_shift_config[state_clean]:
+                    vals = shed_shift_config[state_clean][subsector]
+                    shed = vals.get("shed", 0.0)
+                    shift = vals.get("shift", 0.0)
+                    
+                    # If this subsector has shed/shift percentages, split the row
+                    if shed != 0.0 or shift != 0.0:
+                        val = row[state_clean]
+                        static_val = (1 - shed - shift) * val
+                        shed_val = shed * val
+                        shift_val = shift * val
+                        # Defensive: never negative
+                        static_val = max(static_val, 0.0)
+                        shed_val = max(shed_val, 0.0)
+                        shift_val = max(shift_val, 0.0)
+                        
+                        # Build three new rows, one for each row_type
+                        for t, v in zip(['static', 'shed', 'shift'], [static_val, shed_val, shift_val]):
+                            new_row = row.copy()
+                            new_row[state_clean] = v
+                            new_row["row_type"] = t
+                            augmented_rows.append(new_row)
+                    else:
+                        # No shed/shift for this subsector, keep original row
                         new_row = row.copy()
-                        new_row[state_clean] = v
-                        new_row["row_type"] = t
+                        new_row["row_type"] = "original"
                         augmented_rows.append(new_row)
+                else:
+                    # Subsector not in config, keep original row
+                    new_row = row.copy()
+                    new_row["row_type"] = "original"
+                    augmented_rows.append(new_row)
 
         # Combine original (minus dropped) and all augmented
         if augmented_rows:
             aug_df = pd.DataFrame(augmented_rows)
             full_df = pd.concat([full_df, aug_df], ignore_index=True)
-
 
         # Save to temporary file
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
