@@ -76,6 +76,7 @@
       display: flex;
       gap: 10px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .state-name-input {
@@ -105,6 +106,44 @@
       outline: none;
       background: white;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+
+    .toggle-shed-shift {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .toggle-switch.active {
+      background: rgba(16, 172, 132, 0.8);
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(20px);
     }
 
     .remove-state {
@@ -151,7 +190,6 @@
       font-size: 13px;
     }
 
-    .percent-input,
     .scenario-input {
       padding: 8px 10px;
       border: 2px solid #e1e8ed;
@@ -160,17 +198,9 @@
       color: #727272;
       transition: all 0.3s ease;
       background: white;
-    }
-
-    .percent-input {
-      width: 80px;
-    }
-
-    .scenario-input {
       width: 120px;
     }
 
-    .percent-input:focus,
     .scenario-input:focus {
       outline: none;
       border-color: #667eea;
@@ -337,11 +367,11 @@
     • Global Base Scenario applies to all states/subsectors by default<br>
     • State Base Scenario overrides global base for that specific state<br>
     • Subsector scenarios override the state base (or global base if no state base set)<br>
-    • Multipliers are applied after scenario selection
+    • Enable Shed/Shift toggle to apply flex load
   </div>
 
   <div id="statesContainer" class="states-grid">
-    <!-- State containers will be added here -->
+    <!-- State containers  -->
   </div>
 
   <button class="add-state-btn" onclick="addState()">+ Add State Configuration</button>
@@ -356,28 +386,6 @@
       'residential space heating',
       'light-commercial truck', 'residential water heating', 'single unit short-haul truck',
       'passenger car', 'passenger truck', 'commercial water heating', 'combination short-haul truck'
-    ];
-
-    // Subsectors that should always use baseline scenario and no percentage changes
-    const baselineOnlySubsectors = [
-      'commercial cooking', 'commercial other', 'commercial refrigeration', 'data center cooling',
-      'data center it', 'district services', 'office equipment (non-p.c.)',
-      'office equipment (p.c.)', 'streetlights', 'agriculture-crops',
-      'agriculture-other', 'aluminum industry', 'balance of manufacturing other', 'residential furnace fans and boiler pumps',
-      'bulk chemicals', 'cement', 'coal mining', 'commercial ventilation', 'computer and electronic products',
-      'construction', 'electrical equip., appliances, and components',
-      'fabricated metal products', 'food and kindred products',
-      'glass and glass products', 'machinery', 'metal and other non-metallic mining',
-      'oil & gas mining', 'paper and allied products', 'petroleum refining',
-      'plastic and rubber products', 'transportation equipment', 'wood products', 'motor home', 'refuse truck', 'residential ceiling fans',
-      'residential clothes drying', 'residential clothes washing',
-      'residential cooking', 'residential cooking - secondary',
-      'residential dehumidifiers', 'residential dishwashing', 'residential freezing', 'residential hot tubs',
-      'residential humidifiers', 'residential lighting', 'residential microwaves',
-      'residential other', 'residential pool pumps', 'residential refrigeration',
-      'residential secondary heating',
-      'school bus', 'single unit long-haul truck', 'residential tv and peripherals',
-      'other bus', 'passenger rail', 'transit bus'
     ];
 
     let stateCounter = 0;
@@ -413,8 +421,18 @@
         </select>
       `;
 
+      const toggleDiv = document.createElement("div");
+      toggleDiv.className = "toggle-shed-shift";
+      toggleDiv.innerHTML = `
+        <span>Enable Flexible Load</span>
+        <div class="toggle-switch" onclick="toggleShedShift(this)">
+          <div class="toggle-slider"></div>
+        </div>
+      `;
+
       titleSection.appendChild(titleDiv);
       titleSection.appendChild(controlsDiv);
+      titleSection.appendChild(toggleDiv);
 
       const removeBtn = document.createElement("button");
       removeBtn.className = "remove-state";
@@ -427,7 +445,7 @@
       const subsectorsDiv = document.createElement("div");
       subsectorsDiv.className = "subsectors-container";
 
-      // Add header row
+      // Header row
       const headerRow = document.createElement("div");
       headerRow.className = "subsector-row";
       headerRow.style.fontWeight = "bold";
@@ -435,12 +453,11 @@
       headerRow.style.padding = "5px";
       headerRow.innerHTML = `
         <div class="subsector-label">Subsector</div>
-        <div class="percent-input">Multiplier</div>
         <div class="scenario-input">Scenario Override</div>
       `;
       subsectorsDiv.appendChild(headerRow);
 
-      // Add subsector rows
+      // Subsector rows
       subsectors.forEach(subsector => {
         const row = document.createElement("div");
         row.className = "subsector-row";
@@ -448,16 +465,6 @@
         const label = document.createElement("div");
         label.className = "subsector-label";
         label.textContent = subsector;
-
-        const percentInput = document.createElement("input");
-        percentInput.type = "number";
-        percentInput.min = "0";
-        percentInput.max = "10";
-        percentInput.step = "0.01";
-        percentInput.placeholder = "0.0";
-        percentInput.className = "percent-input";
-        percentInput.dataset.subsector = subsector;
-        percentInput.dataset.stateId = stateCounter;
 
         const scenarioInput = document.createElement("select");
         scenarioInput.className = "scenario-input";
@@ -471,7 +478,6 @@
         `;
 
         row.appendChild(label);
-        row.appendChild(percentInput);
         row.appendChild(scenarioInput);
         subsectorsDiv.appendChild(row);
       });
@@ -479,6 +485,10 @@
       stateDiv.appendChild(headerDiv);
       stateDiv.appendChild(subsectorsDiv);
       container.appendChild(stateDiv);
+    }
+
+    function toggleShedShift(toggleElement) {
+      toggleElement.classList.toggle('active');
     }
 
     function removeState(stateId) {
@@ -494,28 +504,25 @@
       const custom_values = {};
       const fallback_scenarios = {};
       const state_base_scenarios = {};
+      const shed_shift_enabled = {};
 
       // Process each state container
       document.querySelectorAll(".state-container").forEach(stateContainer => {
         const stateNameInput = stateContainer.querySelector(".state-name-input");
         const stateBaseScenarioInput = stateContainer.querySelector(".state-base-scenario");
+        const shedShiftToggle = stateContainer.querySelector(".toggle-switch");
 
         const stateName = (stateNameInput && stateNameInput.value) ? stateNameInput.value.trim().toLowerCase() : "__ALL_STATES__";
         const stateBaseScenario = (stateBaseScenarioInput && stateBaseScenarioInput.value) ? stateBaseScenarioInput.value.trim().toLowerCase() : "";
+        const shedShiftEnabled = shedShiftToggle && shedShiftToggle.classList.contains('active');
 
         // Store state base scenario if different from global
         if (stateBaseScenario && stateBaseScenario !== globalScenario) {
           state_base_scenarios[stateName] = stateBaseScenario;
         }
 
-        // Get percentage values for this state
-        stateContainer.querySelectorAll(".percent-input").forEach(input => {
-          const subsector = input.dataset.subsector;
-          const value = parseFloat(input.value);
-          if (!isNaN(value) && value !== 0.0) {
-            custom_values[[stateName, subsector]] = value;
-          }
-        });
+        // Store shed/shift enabled status
+        shed_shift_enabled[stateName] = shedShiftEnabled;
 
         // Get scenario overrides for this state
         stateContainer.querySelectorAll(".scenario-input").forEach(input => {
@@ -532,7 +539,8 @@
         scenario: globalScenario,
         custom_values,
         fallback_scenarios,
-        state_base_scenarios
+        state_base_scenarios,
+        shed_shift_enabled
       };
 
       console.log("Sending payload:", payload);
